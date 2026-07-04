@@ -1,0 +1,42 @@
+# Arena PvP — deathmatch with public server list
+
+One Node server does everything: serves the game page, keeps a list of public rooms
+(ongoing games), and is authoritative for ids/health/hits/deaths/scores.
+
+## Files
+- `index.html` — the game (also present as `arena-pvp-prototype.html`).
+- `server.js` — room server + game host (one port).
+- `package.json` — so hosts know how to install/run.
+
+## Front page
+`PLAY VS BOT` · `JOIN / CREATE SERVER` → opens the room list (all public, no passwords).
+Click a game to jump in, or `CREATE GAME` to start one. Names auto-assign (P1, P2, …).
+
+## Run locally
+```
+npm install
+npm start
+```
+Open http://localhost:8080 in two tabs → both click JOIN / CREATE SERVER → create/join → you're in the same match.
+
+## Deploy on Render (free, ~5 min) and point your domain at it
+1. Put these files in a folder and push to a GitHub repo (index.html, arena-pvp-prototype.html, server.js, package.json).
+2. On render.com → **New → Web Service** → connect that repo.
+   - Environment: **Node**
+   - Build command: `npm install`
+   - Start command: `npm start`
+   - Instance type: Free is fine to start.
+3. Render gives you `https://your-app.onrender.com` — open it, you get the game with a working server list.
+4. **Your domain:** in Render → your service → **Settings → Custom Domains → Add** your domain, then at your
+   domain registrar add the DNS record Render shows (a CNAME to the onrender URL, or the given A record).
+   Once it verifies, `https://yourdomain.com` serves the game and the server list.
+
+Render serves https, so the client automatically uses secure `wss://` to the same host — nothing to configure.
+
+## Notes / next steps
+- No install for players — they just open your domain.
+- Free Render instances sleep when idle and take ~30s to wake on the first visit; a paid instance stays warm.
+- Hit model is relay-authoritative (server owns rooms/scores; shooter reports damage, victim owns its health).
+  Solid for friends and early players. When cheating matters, upgrade to full server-side simulation
+  (server runs movement/physics; clients stream inputs + client-side prediction).
+- Local/dev against a separate server: open the page with `?server=ws://localhost:8080`.
